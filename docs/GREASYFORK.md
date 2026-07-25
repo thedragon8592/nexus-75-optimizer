@@ -41,6 +41,10 @@ Features:
 - Captures the original game configuration and provides a reversible Original
   mode.
 - Built-in “How it works” explanation for every optimization.
+- Community Hub with support, changelog and explicit Nexus Chat/Discord links.
+- Honest, copyable performance reports and privacy-safe diagnostics.
+- Portable `NX75` profile codes that never contain account or region data.
+- One-time feedback request after several stable sessions.
 
 This script does not modify WebSocket packets, matchmaking, aiming, hitboxes,
 visibility or game mechanics. It does not replace requestAnimationFrame with
@@ -52,7 +56,11 @@ persistent Nexus ID, friends and private conversations. “Explore Nexus Chat”
 opens only the official website at https://wnexuschat.netlify.app/ and requires
 an explicit click; the userscript never downloads a file. The × and “Not now”
 buttons dismiss only the current appearance. There is no tracking, affiliate
-link, external executable code or automatic redirect.
+link, external executable code or automatic redirect. “Don't show again”
+disables the welcome locally and it can be restored from Community Hub.
+
+Releases are published manually through Greasy Fork. The script has no remote
+updater and never downloads or executes replacement code.
 
 ## Descripción completa — Español
 
@@ -82,6 +90,11 @@ Funciones:
 - Detiene su monitor cuando se oculta el panel o la pestaña.
 - Captura la configuración original y proporciona un modo Original reversible.
 - Explicación “Cómo funciona” integrada para cada optimización.
+- Centro comunitario con soporte, changelog y enlaces explícitos a Nexus
+  Chat/Discord.
+- Resultados de rendimiento y diagnósticos honestos y copiables.
+- Códigos portátiles `NX75` sin datos de cuenta o región.
+- Una única solicitud de feedback después de varias sesiones estables.
 
 El script no modifica paquetes WebSocket, matchmaking, puntería, hitboxes,
 visibilidad ni mecánicas. Tampoco reemplaza requestAnimationFrame con
@@ -93,7 +106,11 @@ Global, Nexus ID persistente, amigos y conversaciones privadas. “Explore Nexus
 Chat” abre únicamente la web oficial https://wnexuschat.netlify.app/ y requiere
 un clic explícito; el userscript nunca descarga archivos. La × y “Not now”
 cierran solo la aparición actual. No contiene seguimiento, enlaces de afiliados,
-código ejecutable externo ni redirecciones automáticas.
+código ejecutable externo ni redirecciones automáticas. “Don't show again”
+desactiva localmente la bienvenida y Community Hub permite reactivarla.
+
+Las versiones se publican manualmente mediante Greasy Fork. El script no tiene
+actualizador remoto y nunca descarga ni ejecuta código de reemplazo.
 
 ## Nota para el formulario
 
@@ -105,3 +122,4 @@ código ejecutable externo ni redirecciones automáticas.
 - Enlaces de afiliado: ninguno.
 - Contenido adulto: no.
 - La promoción de Nexus Chat está divulgada en ambas descripciones.
+- Antifeature declarado: `ads`, por la promoción propia de Nexus Chat.

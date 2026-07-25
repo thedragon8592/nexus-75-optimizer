@@ -1,11 +1,14 @@
 // ==UserScript==
 // @name         Nexus 75 Optimizer
 // @namespace    https://wnexuschat.netlify.app/
-// @version      1.2.0
+// @version      1.3.0
 // @description  Safe, measurable performance optimization for survev.io and resurviv.biz.
 // @description:es Optimización segura y medible de rendimiento para survev.io y resurviv.biz.
 // @author       Nexus
 // @homepageURL  https://wnexuschat.netlify.app/
+// @supportURL   https://discord.gg/rDJhfCTDqR
+// @license      MIT
+// @antifeature  ads
 // @match        https://survev.io/*
 // @match        https://*.survev.io/*
 // @match        https://resurviv.biz/*
@@ -21,18 +24,29 @@
 
   if (window.top !== window.self) return;
 
-  const VERSION = "1.2.0";
+  const VERSION = "1.3.0";
   const NEXUS_CHAT_URL = "https://wnexuschat.netlify.app/";
+  const DISCORD_URL = "https://discord.gg/rDJhfCTDqR";
+  const REPOSITORY_URL = "https://github.com/thedragon8592/nexus-75-optimizer";
+  const BUG_REPORT_URL = `${REPOSITORY_URL}/issues/new?labels=bug`;
+  const FEATURE_REQUEST_URL = `${REPOSITORY_URL}/issues/new?labels=enhancement`;
+  const CHANGELOG_URL = `${REPOSITORY_URL}/blob/main/CHANGELOG.md`;
+  const GREASY_FORK_FEEDBACK_URL = "https://greasyfork.org/scripts/586802-nexus-75-optimizer/feedback";
   const SETTINGS_KEY = "nxo:settings:v1";
   const BASELINE_KEY = "nxo:baseline:v1";
   const GAME_CONFIG_KEY = "surviv_config";
   const REGION_LEASE_KEY = "nxo:region-lease:v1";
   const AUTO_TUNE_KEY = "nxo:auto-tune:v1";
+  const COMMUNITY_KEY = "nxo:community:v1";
   const PROMO_VISIT_KEY = "nxo:nexus-chat-visit-count:v1";
+  const PROMO_DISABLED_KEY = "nxo:nexus-chat-promo-disabled:v1";
   const PROMO_INTERVAL = 5;
+  const PROFILE_CODE_VERSION = 1;
+  const COMMUNITY_SUCCESS_THRESHOLD = 3;
 
   const shouldShowPromoThisVisit = () => {
     try {
+      if (localStorage.getItem(PROMO_DISABLED_KEY) === "true") return false;
       const stored = Number.parseInt(localStorage.getItem(PROMO_VISIT_KEY) || "0", 10);
       const previous = Number.isInteger(stored) && stored >= 0 ? stored : 0;
       const current = (previous % PROMO_INTERVAL) + 1;
@@ -222,6 +236,66 @@
       sixtyHz: "Display refresh appears close to 60 Hz; 75 visible FPS is not possible on this monitor.",
       competitiveStatus: (target, rtt) => `Clean competitive · target ${target} · monitor sleeps in-game${rtt}.`,
       rtt: (value) => ` · estimated RTT ${value} ms (not game ping)`,
+      communityTitle: "Community Hub",
+      communityIntro: "Share honest results, exchange local profiles and help improve Nexus 75. Nothing here uploads data automatically.",
+      exploreNexus: "Explore Nexus Chat",
+      joinDiscord: "Join Discord",
+      reportBug: "Report a bug",
+      requestFeature: "Request a feature",
+      viewChangelog: "View changelog",
+      copyResult: "Copy performance result",
+      copyDiagnostics: "Copy diagnostics",
+      copyProfile: "Copy profile code",
+      importProfile: "Import profile",
+      profileCode: "Community profile code",
+      profileHint: "Import only changes the draft. Review it, then use Apply & reload.",
+      manualUpdates: "Manual releases only: this script never downloads or executes remote updates.",
+      copiedResult: "Performance result copied.",
+      copiedDiagnostics: "Diagnostics copied. Review them before sharing.",
+      copiedProfile: "Profile code copied.",
+      importedProfile: "Profile imported. Review it before applying.",
+      invalidProfile: "That Nexus 75 profile code is invalid.",
+      copyFailed: "Clipboard access failed. Select and copy the text manually.",
+      promoEnable: "Enable Nexus welcome",
+      promoDisable: "Disable Nexus welcome",
+      promoEnabled: "The Nexus Chat welcome can appear every fifth launch.",
+      promoDisabled: "The Nexus Chat welcome is disabled on this device.",
+      changelogTitle: "Nexus 75 v1.3",
+      changelogItems: [
+        "Community Hub and honest shareable diagnostics",
+        "Portable local profile codes",
+        "Lower-pressure feedback and Nexus Chat invitations"
+      ],
+      changelogDismiss: "Got it",
+      feedbackTitle: "Has Nexus 75 helped your game?",
+      feedbackBody: "After several stable sessions, honest feedback helps the community choose safe settings.",
+      leaveFeedback: "Leave feedback",
+      feedbackNotNow: "Not now",
+      nexusUtilityTitle: "Result copied. Keep the squad together?",
+      nexusUtilityBody: "Nexus Chat adds match rooms, Global, friends and private conversations across both games.",
+      customProfile: "Custom",
+      profileNames: {
+        quality: "Quality",
+        balanced: "Balanced",
+        performance: "FPS",
+        competitive: "Competitive",
+        extreme: "Extreme",
+        original: "Original",
+        custom: "Custom"
+      },
+      reportLabels: {
+        title: "Nexus 75 Performance Result",
+        game: "Game",
+        profile: "Profile",
+        target: "Target",
+        fps: "FPS",
+        low: "1% low",
+        p95: "p95 frame",
+        rendering: "Rendering",
+        textures: "Textures",
+        communityProfile: "Community profile",
+        unavailable: "measuring"
+      },
       promoEyebrow: "NEXUS CHAT · BUILT FOR SURVEV & RESURVIV",
       promoTitle: "The match ends.",
       promoAccent: "Your squad doesn't.",
@@ -234,6 +308,7 @@
       promoTrust: "v3.7.0 · Chrome / Edge · Open source · No password required",
       promoAction: "Explore Nexus Chat",
       promoDismiss: "Not now",
+      promoNever: "Don't show again",
       promoClose: "Dismiss Nexus Chat promotion",
       promoPreview: {
         match: "Match chat",
@@ -309,7 +384,67 @@
       measuringTarget: (target) => `Objetivo ${target}: midiendo. La estabilidad y un p95 bajo son prioridad.`,
       sixtyHz: "El refresco parece cercano a 60 Hz; 75 FPS visibles no son posibles en este monitor.",
       competitiveStatus: (target, rtt) => `Competitivo limpio · objetivo ${target} · monitor dormido al jugar${rtt}.`,
-      rtt: (value) => ` · RTT estimado ${value} ms (no es ping del juego)`
+      rtt: (value) => ` · RTT estimado ${value} ms (no es ping del juego)`,
+      communityTitle: "Centro de comunidad",
+      communityIntro: "Comparte resultados honestos, intercambia perfiles locales y ayuda a mejorar Nexus 75. Nada se envía automáticamente.",
+      exploreNexus: "Explorar Nexus Chat",
+      joinDiscord: "Unirse a Discord",
+      reportBug: "Reportar un problema",
+      requestFeature: "Sugerir una función",
+      viewChangelog: "Ver cambios",
+      copyResult: "Copiar resultado de rendimiento",
+      copyDiagnostics: "Copiar diagnóstico",
+      copyProfile: "Copiar código de perfil",
+      importProfile: "Importar perfil",
+      profileCode: "Código de perfil comunitario",
+      profileHint: "Importar solo cambia el borrador. Revísalo y luego pulsa Aplicar y recargar.",
+      manualUpdates: "Solo versiones manuales: este script nunca descarga ni ejecuta actualizaciones remotas.",
+      copiedResult: "Resultado de rendimiento copiado.",
+      copiedDiagnostics: "Diagnóstico copiado. Revísalo antes de compartir.",
+      copiedProfile: "Código de perfil copiado.",
+      importedProfile: "Perfil importado. Revísalo antes de aplicarlo.",
+      invalidProfile: "Ese código de perfil de Nexus 75 no es válido.",
+      copyFailed: "No se pudo acceder al portapapeles. Selecciona y copia el texto manualmente.",
+      promoEnable: "Activar bienvenida de Nexus",
+      promoDisable: "Desactivar bienvenida de Nexus",
+      promoEnabled: "La bienvenida de Nexus Chat puede aparecer cada quinta apertura.",
+      promoDisabled: "La bienvenida de Nexus Chat está desactivada en este dispositivo.",
+      changelogTitle: "Nexus 75 v1.3",
+      changelogItems: [
+        "Centro comunitario y diagnósticos honestos para compartir",
+        "Códigos portátiles de perfiles locales",
+        "Invitaciones menos invasivas para feedback y Nexus Chat"
+      ],
+      changelogDismiss: "Entendido",
+      feedbackTitle: "¿Nexus 75 mejoró tu juego?",
+      feedbackBody: "Después de varias sesiones estables, una opinión honesta ayuda a la comunidad a elegir ajustes seguros.",
+      leaveFeedback: "Dejar una opinión",
+      feedbackNotNow: "Ahora no",
+      nexusUtilityTitle: "Resultado copiado. ¿Mantener unido al equipo?",
+      nexusUtilityBody: "Nexus Chat añade salas de partida, Global, amigos y conversaciones privadas en ambos juegos.",
+      customProfile: "Personalizado",
+      profileNames: {
+        quality: "Calidad",
+        balanced: "Balance",
+        performance: "FPS",
+        competitive: "Competitivo",
+        extreme: "Extremo",
+        original: "Original",
+        custom: "Personalizado"
+      },
+      reportLabels: {
+        title: "Resultado de rendimiento Nexus 75",
+        game: "Juego",
+        profile: "Perfil",
+        target: "Objetivo",
+        fps: "FPS",
+        low: "1% low",
+        p95: "frame p95",
+        rendering: "Render",
+        textures: "Texturas",
+        communityProfile: "Perfil comunitario",
+        unavailable: "midiendo"
+      }
     }
   };
 
@@ -331,10 +466,123 @@
     }
   };
 
+  const isPromoDisabled = () => {
+    try {
+      return localStorage.getItem(PROMO_DISABLED_KEY) === "true";
+    } catch {
+      return false;
+    }
+  };
+
+  const setPromoDisabled = (disabled) => {
+    try {
+      if (disabled) localStorage.setItem(PROMO_DISABLED_KEY, "true");
+      else localStorage.removeItem(PROMO_DISABLED_KEY);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   let saved = { ...DEFAULTS, ...readJson(SETTINGS_KEY, {}) };
   if (!Object.hasOwn(TEXT, saved.language)) saved.language = "en";
   let draft = { ...saved };
   const copy = () => TEXT[saved.language] || TEXT.en;
+  const PROFILE_KEYS = [
+    "enabled",
+    "lowResTextures",
+    "renderAt1x",
+    "keepInterpolation",
+    "disableScreenShake",
+    "muteAudio",
+    "reduceLobbyMotion",
+    "quietGameplay",
+    "competitiveMode",
+    "lockSelectedRegion",
+    "smartRegion",
+    "autoTune",
+    "sleepMonitorInGame"
+  ];
+  const PROFILE_TOKENS = {
+    quality: "QUALITY",
+    balanced: "BAL",
+    performance: "FPS",
+    competitive: "COMP",
+    extreme: "EXT",
+    original: "ORIG",
+    custom: "CUSTOM"
+  };
+  const TOKEN_PROFILES = Object.fromEntries(
+    Object.entries(PROFILE_TOKENS).map(([profile, token]) => [token, profile])
+  );
+  const communityDefaults = {
+    successfulSessions: 0,
+    feedbackAsked: false,
+    changelogSeen: ""
+  };
+  let community = {
+    ...communityDefaults,
+    ...readJson(COMMUNITY_KEY, {})
+  };
+  let feedbackPromptVisible = false;
+  let nexusUtilityVisible = false;
+  let successfulSessionCounted = false;
+  let changelogVisible = community.changelogSeen !== VERSION;
+  if (changelogVisible) {
+    community.changelogSeen = VERSION;
+    writeJson(COMMUNITY_KEY, community);
+  }
+
+  const profileMaskFor = (settings) => PROFILE_KEYS.reduce(
+    (mask, key, index) => mask | (settings[key] ? 2 ** index : 0),
+    0
+  );
+
+  const profileCodeFor = (settings) => {
+    const profile = Object.hasOwn(PROFILE_TOKENS, settings.preset)
+      ? settings.preset
+      : "custom";
+    const token = PROFILE_TOKENS[profile];
+    const target = Math.min(75, Math.max(30, Number(settings.targetFps) || 75));
+    return [
+      "NX75",
+      PROFILE_CODE_VERSION,
+      token,
+      target,
+      profileMaskFor(settings).toString(36).toUpperCase()
+    ].join("-");
+  };
+
+  const parseProfileCode = (rawCode) => {
+    const normalized = String(rawCode || "").trim().toUpperCase();
+    const match = normalized.match(/^NX75-(\d+)-(QUALITY|BAL|FPS|COMP|EXT|ORIG|CUSTOM)-(\d{2})-([0-9A-Z]+)$/);
+    if (!match || Number(match[1]) !== PROFILE_CODE_VERSION) return null;
+    const targetFps = Number(match[3]);
+    const mask = Number.parseInt(match[4], 36);
+    if (
+      !Number.isInteger(targetFps)
+      || targetFps < 30
+      || targetFps > 75
+      || !Number.isSafeInteger(mask)
+      || mask < 0
+      || mask >= 2 ** PROFILE_KEYS.length
+    ) return null;
+    const values = Object.fromEntries(
+      PROFILE_KEYS.map((key, index) => [key, Boolean(mask & (2 ** index))])
+    );
+    const requestedPreset = TOKEN_PROFILES[match[2]] || "custom";
+    const presetDefinition = PRESETS[requestedPreset];
+    const matchesPreset = presetDefinition && PROFILE_KEYS.every((key) => (
+      !Object.hasOwn(presetDefinition, key)
+      || Boolean(presetDefinition[key]) === values[key]
+    ));
+    return {
+      ...values,
+      preset: matchesPreset ? requestedPreset : "custom",
+      targetFps,
+      code: normalized
+    };
+  };
 
   const GAME_DEFAULTS = {
     highResTex: true,
@@ -580,6 +828,37 @@
     .apply { border: 1px solid #38e7ff; color: #041217; background: #38e7ff; font-weight: 900; }
     .tune { border: 1px solid #24798b; color: #a1efff; background: #09232d; }
     .restore { border: 1px solid #32515d; color: #9db3bb; background: #091821; }
+    .community-body { display: grid; gap: 9px; padding: 0 10px 10px; }
+    .community-intro, .profile-hint, .manual-updates { margin: 0; color: #7f9ca7; font-size: 10px; }
+    .community-links, .community-tools { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .community-button {
+      min-width: 0; padding: 8px; border: 1px solid #24576a; border-radius: 8px;
+      color: #b9eef7; background: #09202a; cursor: pointer; font-size: 10px;
+    }
+    .community-button.primary { border-color: #38e7ff; color: #041217; background: #38e7ff; font-weight: 900; }
+    .profile-box { padding: 9px; border: 1px solid #173e4b; border-radius: 9px; background: #07131b; }
+    .profile-box label { display: block; margin-bottom: 6px; color: #a9eefa; font-size: 10px; font-weight: 800; }
+    .profile-input {
+      width: 100%; padding: 8px; border: 1px solid #285667; border-radius: 7px;
+      color: #dffbff; background: #050e14; font: 10px/1.2 ui-monospace, SFMono-Regular, Consolas, monospace;
+      text-transform: uppercase;
+    }
+    .profile-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+    .community-card, .release-note, .feedback-card {
+      margin-top: 10px; padding: 10px; border: 1px solid #1e5262;
+      border-radius: 10px; background: linear-gradient(135deg, #081a24, #0a222d);
+    }
+    .community-card[hidden], .release-note[hidden], .feedback-card[hidden], .toast[hidden] { display: none; }
+    .community-card strong, .release-note strong, .feedback-card strong { display: block; color: #eafbff; font-size: 11px; }
+    .community-card p, .feedback-card p { margin: 5px 0 8px; color: #84a2ad; font-size: 10px; }
+    .release-note ul { margin: 6px 0 9px; padding-left: 18px; color: #84a2ad; font-size: 10px; }
+    .inline-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .toast {
+      position: sticky; bottom: 4px; z-index: 3; margin-top: 9px; padding: 8px 10px;
+      border: 1px solid #35cfe3; border-radius: 8px; color: #dffbff; background: #072630;
+      box-shadow: 0 8px 24px #000a; font-size: 10px;
+    }
+    .toast[data-tone="error"] { border-color: #ff7a8f; color: #ffd8df; background: #32131b; }
     .diagnostics { margin-top: 11px; color: #6d8d99; font: 10px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; }
     .note { margin-top: 10px; color: #718d98; font-size: 10px; }
     @media (max-width: 520px) {
@@ -650,7 +929,7 @@
       background: #0b789833; font-style: normal; font-size: 10px;
     }
     .actions { display: flex; flex-wrap: wrap; gap: 9px; }
-    .visit, .dismiss { border-radius: 10px; cursor: pointer; font-weight: 850; }
+    .visit, .dismiss, .never { border-radius: 10px; cursor: pointer; font-weight: 850; }
     .visit {
       padding: 12px 16px; border: 1px solid #60e8ff; color: #03141c;
       background: linear-gradient(135deg, #52e5ff, #8a9bff);
@@ -658,6 +937,7 @@
     }
     .visit:hover { filter: brightness(1.08); transform: translateY(-1px); }
     .dismiss { padding: 9px 2px; border: 0; color: #788e9e; background: transparent; font-size: 11px; }
+    .never { margin-left: 10px; padding: 8px 10px; border: 1px solid #324b5b; color: #9db0bd; background: #09131b; font-size: 10px; }
     .trust { margin: 17px 0 0; color: #658092; font-size: 9px; letter-spacing: .035em; }
     .visual {
       position: relative; min-height: 540px; display: grid; place-items: center;
@@ -989,6 +1269,151 @@
     }
   };
 
+  const openExternal = (url) => {
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    if (opened) opened.opener = null;
+  };
+
+  const copyText = async (value) => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+        return true;
+      }
+    } catch {
+      // The local fallback below still works when Clipboard API permission is denied.
+    }
+    const textarea = document.createElement("textarea");
+    textarea.value = value;
+    textarea.setAttribute("readonly", "");
+    textarea.style.cssText = "position:fixed;left:-10000px;top:0;opacity:0";
+    (document.body || document.documentElement).appendChild(textarea);
+    textarea.select();
+    let copied = false;
+    try {
+      copied = document.execCommand("copy");
+    } catch {
+      copied = false;
+    }
+    textarea.remove();
+    return copied;
+  };
+
+  const showToast = (message, tone = "ok") => {
+    const toast = shadow?.getElementById("toast");
+    if (!toast) return;
+    toast.textContent = message;
+    toast.dataset.tone = tone;
+    toast.hidden = false;
+    clearTimeout(showToast.timer);
+    showToast.timer = window.setTimeout(() => {
+      if (toast.isConnected) toast.hidden = true;
+    }, 2800);
+  };
+  showToast.timer = 0;
+
+  const formatPerformanceReport = () => {
+    const text = copy();
+    const labels = text.reportLabels;
+    const fps = metrics.fps || autoTuneReport?.fps || 0;
+    const low = metrics.onePercentLow || autoTuneReport?.onePercentLow || 0;
+    const p95 = metrics.p95 || autoTuneReport?.p95 || 0;
+    const profile = text.profileNames[saved.preset] || text.customProfile;
+    return [
+      `${labels.title} · v${VERSION}`,
+      `${labels.game}: ${location.hostname}`,
+      `${labels.profile}: ${profile}`,
+      `${labels.target}: ${saved.targetFps || 75} FPS`,
+      `${labels.fps}: ${fps ? Math.round(fps) : labels.unavailable}`,
+      `${labels.low}: ${low ? Math.round(low) : labels.unavailable}`,
+      `${labels.p95}: ${p95 ? `${Number(p95).toFixed(1)} ms` : labels.unavailable}`,
+      `${labels.rendering}: ${earlyDiagnostics.applied.renderAt1x ? "1x" : `${earlyDiagnostics.nativeDpr}x DPR`}`,
+      `${labels.textures}: ${earlyDiagnostics.applied.lowResTextures ? "low" : "high"}`,
+      `${labels.communityProfile}: ${profileCodeFor(saved)}`,
+      REPOSITORY_URL
+    ].join("\n");
+  };
+
+  const formatDiagnostics = () => JSON.stringify({
+    product: "Nexus 75 Optimizer",
+    version: VERSION,
+    game: location.hostname,
+    language: saved.language,
+    profile: saved.preset,
+    targetFps: saved.targetFps || 75,
+    metrics: {
+      fps: metrics.fps || null,
+      onePercentLow: metrics.onePercentLow
+        ? Number(metrics.onePercentLow.toFixed(1))
+        : null,
+      p95FrameMs: metrics.p95 ? Number(metrics.p95.toFixed(2)) : null,
+      longTasks: metrics.longTasks
+    },
+    startup: {
+      nativeDpr: earlyDiagnostics.nativeDpr,
+      lowResTextures: earlyDiagnostics.applied.lowResTextures,
+      renderAt1x: earlyDiagnostics.applied.renderAt1x,
+      interpolation: earlyDiagnostics.applied.interpolation,
+      regionMode: earlyDiagnostics.applied.regionMode
+    },
+    autoTune: autoTuneReport
+      ? {
+          displayHz: autoTuneReport.displayHz,
+          recommended: autoTuneReport.recommended
+        }
+      : null,
+    communityProfile: profileCodeFor(saved),
+    privacy: "No account, nickname, IP address, game packets or persistent device identifier included."
+  }, null, 2);
+
+  const renderCommunityPrompt = () => {
+    const prompt = shadow?.getElementById("feedback-prompt");
+    if (prompt) prompt.hidden = !feedbackPromptVisible;
+  };
+
+  const renderNexusUtility = () => {
+    const card = shadow?.getElementById("nexus-utility");
+    if (card) card.hidden = !nexusUtilityVisible;
+  };
+
+  const recordSuccessfulSession = () => {
+    if (
+      successfulSessionCounted
+      || !saved.enabled
+      || metrics.fps <= 0
+      || metrics.frames.length < 30
+      || metrics.fps < (saved.targetFps || 75) * 0.8
+    ) return;
+    successfulSessionCounted = true;
+    community.successfulSessions = Math.min(
+      999,
+      Math.max(0, Number(community.successfulSessions) || 0) + 1
+    );
+    if (
+      community.successfulSessions >= COMMUNITY_SUCCESS_THRESHOLD
+      && !community.feedbackAsked
+    ) {
+      community.feedbackAsked = true;
+      feedbackPromptVisible = true;
+    }
+    writeJson(COMMUNITY_KEY, community);
+    renderCommunityPrompt();
+  };
+
+  const importProfileCode = (value) => {
+    const imported = parseProfileCode(value);
+    if (!imported) return false;
+    draft = {
+      ...draft,
+      ...Object.fromEntries(PROFILE_KEYS.map((key) => [key, imported[key]])),
+      preset: imported.preset,
+      targetFps: imported.targetFps,
+      language: saved.language
+    };
+    renderDraft();
+    return true;
+  };
+
   const renderDraft = () => {
     if (!shadow) return;
     shadow.querySelectorAll("[data-setting]").forEach((input) => {
@@ -997,6 +1422,10 @@
     shadow.querySelectorAll("[data-preset]").forEach((button) => {
       button.classList.toggle("active", button.dataset.preset === draft.preset);
     });
+    const profileInput = shadow.getElementById("profile-code");
+    if (profileInput && shadow.activeElement !== profileInput) {
+      profileInput.value = profileCodeFor(draft);
+    }
   };
 
   const renderDiagnostics = () => {
@@ -1057,6 +1486,7 @@
       launcher.textContent = metrics.fps ? `N·${metrics.fps}` : "N·75";
       launcher.title = `Nexus 75 Optimizer · ${text.panelHint}`;
     }
+    if (healthy) recordSuccessfulSession();
   };
 
   const createOption = (key, [title, description]) => {
@@ -1105,6 +1535,14 @@
           <div class="stat"><b id="aux">0</b><span id="aux-label">${text.stats[3]}</span></div>
         </div>
         <div class="status" id="status">${text.measuring}</div>
+        <div class="release-note" id="release-note" ${changelogVisible ? "" : "hidden"}>
+          <strong>${text.changelogTitle}</strong>
+          <ul>${text.changelogItems.map((item) => `<li>${item}</li>`).join("")}</ul>
+          <div class="inline-actions">
+            <button class="community-button" id="dismiss-changelog">${text.changelogDismiss}</button>
+            <button class="community-button" data-url="${CHANGELOG_URL}">${text.viewChangelog}</button>
+          </div>
+        </div>
         <div class="section-title">${text.mode}</div>
         <div class="presets" id="presets"></div>
         <div class="section-title">${text.controls}</div>
@@ -1115,6 +1553,48 @@
             <div class="how-card"><strong>${title}</strong><span>${body}</span></div>
           `).join("")}</div>
         </details>
+        <details id="community-hub">
+          <summary>${text.communityTitle}</summary>
+          <div class="community-body">
+            <p class="community-intro">${text.communityIntro}</p>
+            <div class="community-links">
+              <button class="community-button primary" data-url="${NEXUS_CHAT_URL}">${text.exploreNexus}</button>
+              <button class="community-button" data-url="${DISCORD_URL}">${text.joinDiscord}</button>
+              <button class="community-button" data-url="${BUG_REPORT_URL}">${text.reportBug}</button>
+              <button class="community-button" data-url="${FEATURE_REQUEST_URL}">${text.requestFeature}</button>
+              <button class="community-button" data-url="${CHANGELOG_URL}">${text.viewChangelog}</button>
+              <button class="community-button" id="promo-toggle">${isPromoDisabled() ? text.promoEnable : text.promoDisable}</button>
+            </div>
+            <div class="community-tools">
+              <button class="community-button" id="copy-result">${text.copyResult}</button>
+              <button class="community-button" id="copy-diagnostics">${text.copyDiagnostics}</button>
+            </div>
+            <div class="profile-box">
+              <label for="profile-code">${text.profileCode}</label>
+              <input class="profile-input" id="profile-code" autocomplete="off" spellcheck="false">
+              <div class="profile-actions">
+                <button class="community-button" id="copy-profile">${text.copyProfile}</button>
+                <button class="community-button" id="import-profile">${text.importProfile}</button>
+              </div>
+              <p class="profile-hint">${text.profileHint}</p>
+            </div>
+            <p class="manual-updates">${text.manualUpdates}</p>
+            <div class="community-card" id="nexus-utility" ${nexusUtilityVisible ? "" : "hidden"}>
+              <strong>${text.nexusUtilityTitle}</strong>
+              <p>${text.nexusUtilityBody}</p>
+              <button class="community-button primary" data-url="${NEXUS_CHAT_URL}">${text.exploreNexus}</button>
+            </div>
+          </div>
+        </details>
+        <div class="feedback-card" id="feedback-prompt" ${feedbackPromptVisible ? "" : "hidden"}>
+          <strong>${text.feedbackTitle}</strong>
+          <p>${text.feedbackBody}</p>
+          <div class="inline-actions">
+            <button class="community-button primary" data-url="${GREASY_FORK_FEEDBACK_URL}" data-feedback-close>${text.leaveFeedback}</button>
+            <button class="community-button" data-url="${BUG_REPORT_URL}" data-feedback-close>${text.reportBug}</button>
+            <button class="community-button" id="dismiss-feedback">${text.feedbackNotNow}</button>
+          </div>
+        </div>
         <div class="actions">
           <button class="apply" id="apply">${text.apply}</button>
           <button class="tune" id="retune">${text.calibrate}</button>
@@ -1122,6 +1602,7 @@
         </div>
         <div class="diagnostics" id="diagnostics">${text.diagPending}</div>
         <div class="note">${text.note}</div>
+        <div class="toast" id="toast" hidden></div>
       </div>
     `;
 
@@ -1154,6 +1635,60 @@
       options.appendChild(createOption(key, definition));
     });
 
+    shadow.querySelectorAll("[data-url]").forEach((button) => {
+      button.addEventListener("click", () => {
+        openExternal(button.dataset.url);
+        if (button.hasAttribute("data-feedback-close")) {
+          feedbackPromptVisible = false;
+          renderCommunityPrompt();
+        }
+      });
+    });
+    shadow.getElementById("dismiss-changelog").addEventListener("click", () => {
+      changelogVisible = false;
+      shadow.getElementById("release-note").hidden = true;
+    });
+    shadow.getElementById("dismiss-feedback").addEventListener("click", () => {
+      feedbackPromptVisible = false;
+      renderCommunityPrompt();
+    });
+    shadow.getElementById("promo-toggle").addEventListener("click", (event) => {
+      const disabled = !isPromoDisabled();
+      setPromoDisabled(disabled);
+      event.currentTarget.textContent = disabled ? text.promoEnable : text.promoDisable;
+      showToast(disabled ? text.promoDisabled : text.promoEnabled);
+    });
+    shadow.getElementById("copy-result").addEventListener("click", async () => {
+      const copied = await copyText(formatPerformanceReport());
+      if (!copied) {
+        showToast(text.copyFailed, "error");
+        return;
+      }
+      nexusUtilityVisible = true;
+      shadow.getElementById("community-hub").open = true;
+      renderNexusUtility();
+      showToast(text.copiedResult);
+    });
+    shadow.getElementById("copy-diagnostics").addEventListener("click", async () => {
+      const copied = await copyText(formatDiagnostics());
+      showToast(copied ? text.copiedDiagnostics : text.copyFailed, copied ? "ok" : "error");
+    });
+    shadow.getElementById("copy-profile").addEventListener("click", async () => {
+      const profileInput = shadow.getElementById("profile-code");
+      const code = profileCodeFor(draft);
+      profileInput.value = code;
+      const copied = await copyText(code);
+      if (!copied) {
+        profileInput.focus();
+        profileInput.select();
+      }
+      showToast(copied ? text.copiedProfile : text.copyFailed, copied ? "ok" : "error");
+    });
+    shadow.getElementById("import-profile").addEventListener("click", () => {
+      const profileInput = shadow.getElementById("profile-code");
+      const imported = importProfileCode(profileInput.value);
+      showToast(imported ? text.importedProfile : text.invalidProfile, imported ? "ok" : "error");
+    });
     shadow.getElementById("apply").addEventListener("click", () => {
       saved = { ...DEFAULTS, ...draft };
       writeJson(SETTINGS_KEY, saved);
@@ -1185,6 +1720,8 @@
     renderDraft();
     renderDiagnostics();
     renderMetrics();
+    renderCommunityPrompt();
+    renderNexusUtility();
   };
 
   const buildUi = (open = true) => {
@@ -1240,10 +1777,7 @@
     scheduleAutoTune();
   };
 
-  const openNexusChat = () => {
-    const opened = window.open(NEXUS_CHAT_URL, "_blank", "noopener,noreferrer");
-    if (opened) opened.opener = null;
-  };
+  const openNexusChat = () => openExternal(NEXUS_CHAT_URL);
 
   const renderPromo = () => {
     if (!promoShadow) return;
@@ -1269,6 +1803,7 @@
               <button class="visit" type="button">${text.promoAction} ↗</button>
             </div>
             <button class="dismiss" type="button">${text.promoDismiss}</button>
+            <button class="never" type="button">${text.promoNever}</button>
             <p class="trust">${text.promoTrust}</p>
           </section>
           <section class="visual" aria-label="Nexus Chat interface preview">
@@ -1301,6 +1836,10 @@
     `;
     promoShadow.querySelector(".close").addEventListener("click", dismissPromo);
     promoShadow.querySelector(".dismiss").addEventListener("click", dismissPromo);
+    promoShadow.querySelector(".never").addEventListener("click", () => {
+      setPromoDisabled(true);
+      dismissPromo();
+    });
     promoShadow.querySelector(".visit").addEventListener("click", () => {
       openNexusChat();
       dismissPromo();

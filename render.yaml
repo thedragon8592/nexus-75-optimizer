@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: nexus-75-optimizer
-    runtime: static
-    plan: free
-    buildCommand: npm run build:render
-    staticPublishPath: ./dist
-    autoDeployTrigger: commit

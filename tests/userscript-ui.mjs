@@ -28,6 +28,17 @@ await context.addInitScript({
         sessionStorage.setItem("nxo:test-promo-seeded", "true");
       }
     } catch {}
+    window.__nxoCopied = [];
+    try {
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: {
+          writeText: async (value) => {
+            window.__nxoCopied.push(value);
+          }
+        }
+      });
+    } catch {}
     ${userscriptSource}
   `
 });
@@ -69,7 +80,7 @@ await page.evaluate(() => document.querySelector("#cvs").getContext("2d"));
 assert.equal(await page.evaluate(() => window.devicePixelRatio), 2);
 
 assert.equal(await page.locator("#nxo-userscript-root [data-setting]").count(), 12);
-assert.equal(await page.locator("#nxo-userscript-root details").getAttribute("open"), "");
+assert.equal(await page.locator("#nxo-userscript-root details").first().getAttribute("open"), "");
 
 await page.waitForTimeout(500);
 await page.screenshot({
@@ -103,6 +114,46 @@ assert.equal(
   await page.locator("#nxo-userscript-root .section-title").first().textContent(),
   "Optimization mode"
 );
+assert.equal(await page.locator("#nxo-userscript-root #community-hub").count(), 1);
+assert.equal(
+  await page.locator("#nxo-userscript-root #release-note strong").textContent(),
+  "Nexus 75 v1.3"
+);
+await page.locator("#nxo-userscript-root #community-hub summary").click();
+const initialProfileCode = await page
+  .locator("#nxo-userscript-root #profile-code")
+  .inputValue();
+assert.match(initialProfileCode, /^NX75-1-BAL-75-[0-9A-Z]+$/);
+await page.locator("#nxo-userscript-root #copy-profile").click();
+assert.equal(
+  (await page.evaluate(() => window.__nxoCopied)).at(-1),
+  initialProfileCode
+);
+await page.locator("#nxo-userscript-root #copy-result").click();
+assert.match(
+  (await page.evaluate(() => window.__nxoCopied)).at(-1),
+  /Nexus 75 Performance Result · v1\.3\.0/
+);
+assert.equal(
+  await page.locator("#nxo-userscript-root #nexus-utility").evaluate((card) => card.hidden),
+  false
+);
+await page.locator("#nxo-userscript-root #profile-code").fill("NOT-A-PROFILE");
+await page.locator("#nxo-userscript-root #import-profile").click();
+assert.equal(
+  await page.locator("#nxo-userscript-root #toast").textContent(),
+  "That Nexus 75 profile code is invalid."
+);
+await page.locator("#nxo-userscript-root #profile-code").fill(initialProfileCode);
+await page.locator("#nxo-userscript-root #import-profile").click();
+assert.equal(
+  await page.locator("#nxo-userscript-root #toast").textContent(),
+  "Profile imported. Review it before applying."
+);
+await page.screenshot({
+  path: "artifacts/nexus-75-community-hub.png",
+  fullPage: true
+});
 await page.locator("#nxo-userscript-root #language").selectOption("es");
 assert.equal(
   await page.locator("#nxo-userscript-root .section-title").first().textContent(),
@@ -152,12 +203,48 @@ await page.screenshot({
   path: "artifacts/nexus-chat-promo-mobile.png",
   fullPage: true
 });
+await page.locator("#nxo-nexus-chat-promo .never").click();
+assert.equal(
+  await page.evaluate(() => localStorage.getItem("nxo:nexus-chat-promo-disabled:v1")),
+  "true"
+);
+for (let opening = 0; opening < 6; opening += 1) {
+  await page.reload();
+  assert.equal(await page.locator("#nxo-nexus-chat-promo").count(), 0);
+}
+await page.locator("#nxo-userscript-root #community-hub summary").click();
+await page.locator("#nxo-userscript-root #promo-toggle").click();
+assert.equal(
+  await page.evaluate(() => localStorage.getItem("nxo:nexus-chat-promo-disabled:v1")),
+  null
+);
+await page.evaluate(() => {
+  localStorage.setItem("nxo:community:v1", JSON.stringify({
+    successfulSessions: 2,
+    feedbackAsked: false,
+    changelogSeen: "1.3.0"
+  }));
+});
+await page.reload();
+await page.waitForTimeout(1400);
+assert.equal(
+  await page.locator("#nxo-userscript-root #feedback-prompt").evaluate((prompt) => prompt.hidden),
+  false
+);
+assert.equal(
+  JSON.parse(await page.evaluate(() => localStorage.getItem("nxo:community:v1"))).feedbackAsked,
+  true
+);
 
 await browser.close();
 console.log(JSON.stringify({
   optimizerLanguages: ["en", "es"],
   promoLanguage: "en",
   promoFrequency: 5,
+  permanentPromoOptOut: true,
+  communityHub: true,
+  portableProfiles: true,
+  oneTimeFeedback: true,
   nexusChatUrl: "https://wnexuschat.netlify.app/",
   directDownload: false,
   dprRestored: true

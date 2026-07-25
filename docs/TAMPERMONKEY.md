@@ -38,8 +38,30 @@ construida solo con HTML/CSS.
 `Explore Nexus Chat` abre únicamente la web oficial
 `https://wnexuschat.netlify.app/`; el userscript no descarga archivos. La `×` y
 `Not now` cierran solo la aparición actual. El contador reinicia su ciclo y la
-promoción vuelve a mostrarse tras otras cinco aperturas. No se cargan imágenes,
-scripts ni fuentes externas para presentar el anuncio.
+promoción vuelve a mostrarse tras otras cinco aperturas. `Don't show again` la
+desactiva de forma local; puede reactivarse desde Community Hub. No se cargan
+imágenes, scripts ni fuentes externas para presentar el anuncio.
+
+## Comunidad y perfiles
+
+La v1.3 añade un Community Hub local con enlaces explícitos a Nexus Chat,
+Discord, soporte, solicitudes y changelog. Puede copiar un resultado de
+rendimiento o un diagnóstico revisable sin subir información automáticamente.
+
+Los perfiles se comparten mediante códigos `NX75` que contienen únicamente
+interruptores de optimización y el objetivo de FPS. No incluyen región,
+nickname, IP, cuenta ni identificadores. Importar un código modifica solo el
+borrador; el usuario debe revisarlo y pulsar **Aplicar y recargar**.
+
+Después de varias sesiones estables puede aparecer una única solicitud de
+feedback honesto. Copiar un resultado muestra una invitación contextual y
+cerrable a Nexus Chat. Ninguna de estas acciones envía telemetría.
+
+## Actualizaciones
+
+Esta edición se actualiza manualmente en Greasy Fork. No contiene
+`@updateURL`, `@downloadURL`, `eval`, cargadores remotos ni un servicio de
+actualización propio.
 
 ## Diferencias frente a la extensión
 

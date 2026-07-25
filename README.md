@@ -13,7 +13,7 @@ ambos juegos:
 - reducción del trabajo visual del lobby mientras se juega;
 - auto-tuner de cuatro segundos solo en el lobby, con resultado válido siete
   días y objetivo adaptado a la frecuencia real de pantalla;
-- interfaz y monitor cargados únicamente al pulsar `F8`; al cerrarlos se detienen
+- interfaz abierta al iniciar y controlable con `F8`; al cerrarla se detienen
   RAF, intervalos, observers y listeners propios;
 - monitor ligero de FPS, 1% low, p95 de frame time y long tasks bajo demanda;
 - perfil **Competitivo limpio**, con audio e interpolación preservados, panel en
@@ -63,21 +63,18 @@ El archivo único `userscript/Nexus-75-Optimizer.user.js` contiene la edición
 Tampermonkey bilingüe (inglés por defecto, español seleccionable), optimización
 en `document-start`, panel abierto automáticamente y controlable con F8,
 explicación integrada y una promoción en inglés de Nexus Chat que aparece cada
-cinco aperturas y enlaza únicamente a la web oficial.
+cinco aperturas y enlaza únicamente a la web oficial. La v1.3.0 también incluye
+un Community Hub, resultados y diagnósticos copiables, perfiles portátiles
+`NX75`, changelog por versión, feedback responsable y la opción **Don't show
+again** para la promoción.
 
 Las instrucciones y diferencias respecto a Manifest V3 están en
 [docs/TAMPERMONKEY.md](docs/TAMPERMONKEY.md).
 
-## Publicación con Render
+## Publicación manual
 
-El repositorio incluye un Blueprint `render.yaml` para publicar la edición
-Tampermonkey como sitio estático. Render ejecuta `npm run build:render` y sirve
-el contenido generado en `dist/`:
-
-- `Nexus-75-Optimizer.user.js`: versión instalable actual;
-- `version.json`: versión, ruta y SHA-256 de la compilación;
-- `index.html`: página oficial de instalación.
-
-Cada commit nuevo en `main` activa un despliegue automático. La versión
-publicada siempre se genera desde `userscript/Nexus-75-Optimizer.user.js`; no se
-descarga ni ejecuta código remoto dentro de la edición de Greasy Fork.
+La edición de Greasy Fork se publica manualmente. El userscript no incluye
+`@updateURL`, `@downloadURL`, cargadores remotos, telemetría ni código que
+descargue y ejecute JavaScript. Para publicar una nueva versión se incrementa
+`@version`, se ejecutan las pruebas y se copia el archivo completo a Greasy
+Fork.
