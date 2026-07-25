@@ -1,0 +1,13 @@
+{
+  "name": "nexus-75-optimizer",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:render": "node scripts/build-render.mjs",
+    "check": "node --check extension/src/early-main.js && node --check extension/src/content.js && node --check extension/src/background.js && node --check userscript/Nexus-75-Optimizer.user.js && node -e \"const f=require('fs');['extension/manifest.json','extension/rules/lean-survev.json','extension/rules/lean-resurviv.json'].forEach(p=>JSON.parse(f.readFileSync(p,'utf8')))\"",
+    "test": "node --test tests/*.test.mjs",
+    "test:userscript-ui": "node tests/userscript-ui.mjs",
+    "smoke:userscript": "node tests/userscript-smoke-live.mjs"
+  }
+}

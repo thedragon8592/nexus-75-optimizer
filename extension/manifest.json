@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "Nexus 75 Optimizer",
+  "version": "0.4.0",
+  "description": "Optimización medible y reversible para survev.io y resurviv.biz.",
+  "permissions": ["declarativeNetRequest"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "lean_survev",
+        "enabled": false,
+        "path": "rules/lean-survev.json"
+      },
+      {
+        "id": "lean_resurviv",
+        "enabled": false,
+        "path": "rules/lean-resurviv.json"
+      }
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://survev.io/*",
+        "https://*.survev.io/*",
+        "https://resurviv.biz/*",
+        "https://*.resurviv.biz/*"
+      ],
+      "js": ["src/early-main.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://survev.io/*",
+        "https://*.survev.io/*",
+        "https://resurviv.biz/*",
+        "https://*.resurviv.biz/*"
+      ],
+      "js": ["src/content.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ]
+}

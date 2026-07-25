@@ -1,0 +1,7 @@
+node_modules/
+dist/
+NexusChatProyect/
+.codex_tmp/
+*.log
+artifacts/
+releases/
